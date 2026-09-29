@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-width=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sausage Tools | Inventory & Spot Checker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        gray: {
+                            900: '#111827',
+                            800: '#1f2937',
+                            700: '#374151',
+                            100: '#f3f4f6'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Touch target optimizations and hiding scrollbars */
+        ::-webkit-scrollbar { display: none; }
+        body { -ms-overflow-style: none; scrollbar-width: none; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: contain; }
+        .touch-target { min-height: 48px; min-width: 48px; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans antialiased h-screen flex flex-col">
+
+    <!-- HEADER -->
+    <header class="bg-gray-800 shadow-md p-4 flex justify-between items-center z-20 shrink-0">
+        <div>
+            <a href="https://sausage.allen.tools" class="text-blue-400 text-sm font-semibold mb-1 block touch-target flex items-center">← Back to Hub</a>
+            <h1 class="text-lg font-bold leading-tight">Inventory & Spot Checker</h1>
+        </div>
+        <button id="btn-config" class="touch-target p-2 bg-gray-700 rounded-full hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <!-- Gear Icon -->
+            <svg class="w-6 h-6 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </button>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 overflow-y-auto relative pb-20 p-4" id="main-content">
+        
+        <!-- INITIAL LOADING STATE -->
+        <div id="loading-state" class="flex flex-col items-center justify-center h-full hidden">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mb-4"></div>
+            <p class="text-gray-400">Syncing with Google Sheets...</p>
+        </div>
+
+        <!-- LIST CONTAINER -->
+        <div id="inventory-list" class="space-y-4">
+            <!-- Items injected here by JS -->
+            <div class="text-center text-gray-500 mt-10" id="empty-state">
+                <p>No items loaded.</p>
+                <p class="text-sm mt-2">Tap the gear icon to configure your Apps Script URL.</p>
+            </div>
+        </div>
+        
+    </main>
+
+    <!-- FLOATING SYNC BUTTON -->
+    <div class="fixed bottom-[80px] right-4 z-30">
+        <button id="btn-sync" class="bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full shadow-lg p-4 flex items-center justify-center hidden">
+            <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            Sync to Sheet
+        </button>
+    </div>
+
+    <!-- BOTTOM TAB NAVIGATION -->
+    <nav class="bg-gray-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-around shrink-0 fixed bottom-0 w-full z-20 pb-safe">
+        <button class="tab-btn flex-1 py-3 text-blue-400 border-t-2 border-blue-400 touch-target flex flex-col items-center" data-tab="full">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+            <span class="text-xs font-semibold">Full Count</span>
+        </button>
+        <button class="tab-btn flex-1 py-3 text-gray-400 border-t-2 border-transparent touch-target flex flex-col items-center" data-tab="spot">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <span class="text-xs font-semibold">Spot Check</span>
+        </button>
+        <button class="tab-btn flex-1 py-3 text-gray-400 border-t-2 border-transparent touch-target flex flex-col items-center" data-tab="waste">
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            <span class="text-xs font-semibold">Waste Log</span>
+        </button>
+    </nav>
+
+    <!-- CONFIG MODAL OVERLAY -->
+    <div id="config-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 hidden flex flex-col justify-end">
+        <div class="bg-gray-800 rounded-t-2xl p-6 w-full max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">System Configuration</h2>
+                <button id="close-config" class="text-gray-400 hover:text-white touch-target">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Apps Script Web App URL</label>
+                    <input type="url" id="input-url" class="w-full bg-gray-900 border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-blue-500 touch-target" placeholder="https://script.google.com/macros/s/.../exec">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-400 mb-1">Passcode (API Key)</label>
+                    <input type="password" id="input-passcode" class="w-full bg-gray-900 border border-gray-700 rounded p-3 text-white focus:outline-none focus:border-blue-500 touch-target" placeholder="Enter your secret passcode">
+                </div>
+                
+                <div class="pt-4">
+                    <button id="save-config" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold rounded p-4 touch-target">Save & Fetch Inventory</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let state = {
+            url: localStorage.getItem('inv_url') || '',
+            passcode: localStorage.getItem('inv_passcode') || '',
+            items: [], // Array of parsed inventory items
+            currentMode: 'full' // full, spot, waste
+        };
+
+        // DOM Elements
+        const DOM = {
+            configBtn: document.getElementById('btn-config'),
+            configModal: document.getElementById('config-modal'),
+            closeConfig: document.getElementById('close-config'),
+            saveConfig: document.getElementById('save-config'),
+            inputUrl: document.getElementById('input-url'),
+            inputPasscode: document.getElementById('input-passcode'),
+            inventoryList: document.getElementById('inventory-list'),
+            loadingState: document.getElementById('loading-state'),
+            emptyState: document.getElementById('empty-state'),
+            syncBtn: document.getElementById('btn-sync'),
+            tabs: document.querySelectorAll('.tab-btn')
+        };
+
+        // Initialization
+        function init() {
+            DOM.inputUrl.value = state.url;
+            DOM.inputPasscode.value = state.passcode;
+            
+            bindEvents();
+            
+            if(state.url && state.passcode) {
+                fetchInventory();
+            }
+        }
+
+        function bindEvents() {
+            DOM.configBtn.addEventListener('click', () => DOM.configModal.classList.remove('hidden'));
+            DOM.closeConfig.addEventListener('click', () => DOM.configModal.classList.add('hidden'));
+            DOM.saveConfig.addEventListener('click', saveConfig);
+            DOM.syncBtn.addEventListener('click', syncToSheet);
+            
+            DOM.tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    const mode = e.currentTarget.dataset.tab;
+                    switchMode(mode);
+                });
+            });
+        }
+
+        function switchMode(mode) {
+            state.currentMode = mode;
+            // Update tab UI
+            DOM.tabs.forEach(t => {
+                if(t.dataset.tab === mode) {
+                    t.classList.add('text-blue-400', 'border-blue-400');
+                    t.classList.remove('text-gray-400', 'border-transparent');
+                } else {
+                    t.classList.remove('text-blue-400', 'border-blue-400');
+                    t.classList.add('text-gray-400', 'border-transparent');
+                }
+            });
+            renderList();
+        }
+
+        function saveConfig() {
+            state.url = DOM.inputUrl.value.trim();
+            state.passcode = DOM.inputPasscode.value.trim();
+            localStorage.setItem('inv_url', state.url);
+            localStorage.setItem('inv_passcode', state.passcode);
+            DOM.configModal.classList.add('hidden');
+            fetchInventory();
+        }
+
+        async function fetchInventory() {
+            if(!state.url) return;
+            
+            DOM.emptyState.classList.add('hidden');
+            DOM.inventoryList.innerHTML = '';
+            DOM.loadingState.classList.remove('hidden');
+
+            try {
+                // Using POST for both read/write to easily pass the passcode in payload instead of URL query string
+                const res = await fetch(state.url, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'read', passcode: state.passcode })
+                });
+                const data = await res.json();
+                
+                if(data.error) throw new Error(data.error);
+                
+                state.items = data.items.map(item => ({
+                    ...item,
+                    localCases: 0,
+                    localUnits: 0,
+                    hasChanges: false
+                }));
+                
+                DOM.syncBtn.classList.remove('hidden');
+                renderList();
+            } catch (err) {
+                alert('Error fetching data: ' + err.message);
+                DOM.emptyState.classList.remove('hidden');
+            } finally {
+                DOM.loadingState.classList.add('hidden');
+            }
+        }
+
+        function renderList() {
+            DOM.inventoryList.innerHTML = '';
+            let filtered = state.items;
+            
+            if (state.currentMode === 'spot') {
+                filtered = state.items.filter(i => i['Is High Cost / High Priority'] === 'Yes');
+            } else if (state.currentMode === 'waste') {
+                // Simplified for waste log mode
+            }
+
+            if(filtered.length === 0) {
+                DOM.inventoryList.innerHTML = `<div class="text-center text-gray-500 mt-10"><p>No items found for this view.</p></div>`;
+                return;
+            }
+
+            // Group by Storage Location for Full Count
+            const grouped = {};
+            filtered.forEach(item => {
+                const loc = item['Storage Location'] || 'Uncategorized';
+                if(!grouped[loc]) grouped[loc] = [];
+                grouped[loc].push(item);
+            });
+
+            for(const [loc, items] of Object.entries(grouped)) {
+                const groupHeader = document.createElement('h3');
+                groupHeader.className = 'text-lg font-bold text-gray-400 border-b border-gray-700 pb-2 mt-6 mb-4 uppercase tracking-wider';
+                groupHeader.textContent = loc;
+                DOM.inventoryList.appendChild(groupHeader);
+
+                items.forEach(item => {
+                    const card = createItemCard(item);
+                    DOM.inventoryList.appendChild(card);
+                });
+            }
+        }
+
+        function createItemCard(item) {
+            const el = document.createElement('div');
+            el.className = `bg-gray-800 p-4 rounded-lg shadow border ${item.hasChanges ? 'border-blue-500' : 'border-gray-700'}`;
+            
+            const uom = item['Unit of Measure'] || 'Units';
+            const packSize = parseInt(item['Case Pack Size']) || 1;
+
+            el.innerHTML = \`
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <h4 class="font-bold text-white">\${item['Item Name']}</h4>
+                        <p class="text-xs text-gray-400">\${item['ItemID']} | Pack: \${packSize} \${uom}/Case</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-400">Current OH</p>
+                        <p class="font-mono text-sm">\${item['OH'] || 0} \${uom}</p>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4">
+                    <!-- Cases Input -->
+                    <div class="flex-1 bg-gray-900 rounded p-2 flex flex-col items-center">
+                        <span class="text-xs text-gray-400 mb-2">Cases</span>
+                        <div class="flex items-center space-x-3 w-full justify-center">
+                            <button class="bg-gray-700 touch-target rounded text-xl w-10 h-10 flex items-center justify-center btn-minus-cases">-</button>
+                            <span class="font-mono text-xl w-8 text-center cases-val">\${item.localCases}</span>
+                            <button class="bg-gray-700 touch-target rounded text-xl w-10 h-10 flex items-center justify-center btn-plus-cases">+</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Loose Units Input -->
+                    <div class="flex-1 bg-gray-900 rounded p-2 flex flex-col items-center">
+                        <span class="text-xs text-gray-400 mb-2">Loose (\${uom})</span>
+                        <div class="flex items-center space-x-3 w-full justify-center">
+                            <button class="bg-gray-700 touch-target rounded text-xl w-10 h-10 flex items-center justify-center btn-minus-units">-</button>
+                            <span class="font-mono text-xl w-8 text-center units-val">\${item.localUnits}</span>
+                            <button class="bg-gray-700 touch-target rounded text-xl w-10 h-10 flex items-center justify-center btn-plus-units">+</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3 text-center text-sm font-semibold text-blue-400">
+                    Total: <span class="total-calc">\${(item.localCases * packSize) + item.localUnits}</span> \${uom}
+                </div>
+            \`;
+
+            // Bind +/- events
+            const updateUI = () => {
+                el.querySelector('.cases-val').textContent = item.localCases;
+                el.querySelector('.units-val').textContent = item.localUnits;
+                el.querySelector('.total-calc').textContent = (item.localCases * packSize) + item.localUnits;
+                item.hasChanges = true;
+                el.classList.add('border-blue-500');
+            };
+
+            el.querySelector('.btn-minus-cases').addEventListener('click', () => { if(item.localCases > 0) { item.localCases--; updateUI(); }});
+            el.querySelector('.btn-plus-cases').addEventListener('click', () => { item.localCases++; updateUI(); });
+            el.querySelector('.btn-minus-units').addEventListener('click', () => { if(item.localUnits > 0) { item.localUnits--; updateUI(); }});
+            el.querySelector('.btn-plus-units').addEventListener('click', () => { item.localUnits++; updateUI(); });
+
+            return el;
+        }
+
+        async function syncToSheet() {
+            const changedItems = state.items.filter(i => i.hasChanges).map(i => {
+                const packSize = parseInt(i['Case Pack Size']) || 1;
+                const totalOH = (i.localCases * packSize) + i.localUnits;
+                return {
+                    ItemID: i.ItemID,
+                    OH_Quantity: totalOH,
+                    Timestamp: new Date().toISOString()
+                };
+            });
+
+            if(changedItems.length === 0) {
+                alert('No changes to sync.');
+                return;
+            }
+
+            const originalText = DOM.syncBtn.innerHTML;
+            DOM.syncBtn.innerHTML = '<div class="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full mr-2"></div> Syncing...';
+            DOM.syncBtn.disabled = true;
+
+            try {
+                const res = await fetch(state.url, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update',
+                        passcode: state.passcode,
+                        updates: changedItems
+                    })
+                });
+                const data = await res.json();
+                
+                if(data.error) throw new Error(data.error);
+                
+                alert(`Successfully updated ${changedItems.length} items!`);
+                // Reset changes
+                state.items.forEach(i => i.hasChanges = false);
+                renderList();
+            } catch(err) {
+                alert('Sync failed: ' + err.message);
+            } finally {
+                DOM.syncBtn.innerHTML = originalText;
+                DOM.syncBtn.disabled = false;
+            }
+        }
+
+        // Run
+        init();
+    </script>
+</body>
+</html>

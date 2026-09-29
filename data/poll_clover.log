@@ -1,0 +1,69 @@
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 1 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 3 recently modified orders.
+INFO:root:Aggregated new sales data across 1 new orders: {'Pulled Pork': 1, 'Turkey': 1, 'Brisket': 1, 'Gallon Tea': 8, 'Banana Pudding Catering Tray': 6, 'Charro Bean Catering Tray': 3, 'Coleslaw Catering Tray': 3, 'Mac And Cheese Catering Tray': 3, 'Custom Item': 1, 'Service Charge': 1}
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 3 recently modified orders.
+INFO:root:No new unprocessed sales found to deplete.
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 19 recently modified orders.
+INFO:root:Aggregated new sales data across 18 new orders: {'Turkey sandwich': 2, '2 meat plate': 3, 'Coca Cola Products': 11, 'Service Charge': 14, 'Lean sandwich': 2, '1/2 Rack Pork Spare Ribs': 1, 'Beans Charro': 2, 'Cole Slaw': 2, 'Rosebud': 8, 'TX Cheese': 2, 'Quesabirria taco': 1, 'Street Corn': 1, 'BBQ plate': 4, 'Mac & Cheese': 2, '5pc BBQ Wing': 1, 'Moist Sandwich': 2, 'Brisket': 1, 'Two Step Sandwich': 1, 'Quesadilla Brisket': 1, 'Seasoned French Fries': 1, 'Full Rack Pork Spare Ribs': 1, 'Potato Salad': 1, 'Turkey': 2, 'Ranch side': 1, 'Quesadilla Turkey': 1, 'Pulled Pork': 1, 'Custom Item': 3}
+INFO:root:Clover Sale: 8x Rosebud used 3.64 lbs raw. Depleted 0.05 cases of Brisket (Raw).
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 33 recently modified orders.
+INFO:root:Aggregated new sales data across 14 new orders: {'Brisket': 2, 'Crispy Quesa Taco Brisket': 8, '5pc Smoked Wings': 1, 'Ranch side': 2, 'Service Charge': 13, '5pc Buffalo Wing': 1, 'Seasoned French Fries': 2, 'Rosebud': 8, 'Sauteed Cabbage': 1, 'Mac & Cheese': 1, 'Potato Salad': 1, 'Turkey': 1, 'Coca Cola Products': 8, 'Lean sandwich': 4, 'Taco Plate W/2 Sides': 3, 'BBQ plate': 1, '2 meat plate': 2, 'Hill Country Trinity W/3Sides': 1, '5pc BBQ Wing': 2, 'Pulled pork sandwich': 1, 'Two Step Sandwich': 1, 'Pitmaster Platter &3 Sm Sides': 1, 'Moist Sandwich': 1}
+INFO:root:Clover Sale: 8x Crispy Quesa Taco Brisket used 1.82 lbs raw. Depleted 0.02 cases of Brisket (Raw).
+INFO:root:Clover Sale: 8x Rosebud used 3.64 lbs raw. Depleted 0.05 cases of Brisket (Raw).
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 41 recently modified orders.
+INFO:root:Aggregated new sales data across 8 new orders: {'Kids BBQ Plate w/ side': 1, 'Kids drink': 1, 'Lean sandwich': 1, 'Bevo Platter': 1, 'Cornbread': 2, 'Service Charge': 6, 'BBQ plate': 5, 'Coca Cola Products': 2, '2 meat plate': 2, 'Crispy Quesa Taco Brisket': 2, 'Two Step Sandwich': 1, 'Taco Plate W/2 Sides': 1, 'Rosebud': 2}
+INFO:root:Clover Sale: 2x Crispy Quesa Taco Brisket used 0.45 lbs raw. Depleted 0.01 cases of Brisket (Raw).
+INFO:root:Clover Sale: 2x Rosebud used 0.91 lbs raw. Depleted 0.01 cases of Brisket (Raw).
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 43 recently modified orders.
+INFO:root:Aggregated new sales data across 2 new orders: {'Cornbread': 3, 'Full Rack Pork Spare Ribs': 1, 'Brisket': 1, 'Service Charge': 2, '2 meat plate': 1}
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 45 recently modified orders.
+INFO:root:Aggregated new sales data across 2 new orders: {'Lean sandwich': 1, 'Service Charge': 2, '2 meat plate': 1, 'Coca Cola Products': 1}
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 47 recently modified orders.
+INFO:root:Aggregated new sales data across 2 new orders: {'Full Rack Pork Spare Ribs': 1, 'Crispy Quesa Taco Turkey': 8, 'Cheese Grits': 2, 'Service Charge': 1}
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 53 recently modified orders.
+INFO:root:Aggregated new sales data across 6 new orders: {'2 meat plate': 1, 'Service Charge': 6, 'Coca Cola Products': 3, 'Pitmaster Platter &3 Sm Sides': 1, 'Banana Pudding': 1, 'BBQ plate': 3, 'Turkey sandwich': 1, 'Bevo Platter': 1, 'Cornbread': 5, 'Taco Plate W/2 Sides': 1}
+INFO:root:Fetching Clover orders modified since 24 hours ago...
+INFO:root:Fetched 69 recently modified orders.
+INFO:root:Aggregated new sales data across 15 new orders: {'TX Cheese': 1, 'BBQ Cheese Fries': 1, 'Cornbread': 2, 'Churros (2)': 2, 'Service Charge': 14, 'Taco Plate W/2 Sides': 3, 'Quesabirria taco': 1, 'Coca Cola Products': 7, '2 meat plate': 4, 'Pulled Pork': 1, 'Brisket': 2, 'Beans Charro': 2, 'BBQ plate': 3, 'Turkey sandwich': 1, 'Hill Country Trinity W/3Sides': 1, 'Banana Pudding': 2, 'Two Step Sandwich': 2, '5pc Smoked Wings': 2, 'Moist Sandwich': 1, 'Rosebud': 1}
+INFO:root:Clover Sale: 1x Rosebud used 0.45 lbs raw. Depleted 0.01 cases of Brisket (Raw).

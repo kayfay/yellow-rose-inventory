@@ -1,0 +1,9 @@
+name = "inventory-worker"
+main = "src/index.js"
+compatibility_date = "2024-03-20"
+
+# Secrets required (add these via `npx wrangler secret put <NAME>`):
+# GOOGLE_CLIENT_EMAIL
+# GOOGLE_PRIVATE_KEY
+# GOOGLE_SHEET_ID
+# EXPECTED_PASSCODE
