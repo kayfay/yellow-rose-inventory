@@ -10,6 +10,8 @@ cloudflare-worker/.wrangler/
 # Data & State
 data/*.db
 data/*.csv
+data/*.log
+*.log
 *.csv
 .loop/
 
