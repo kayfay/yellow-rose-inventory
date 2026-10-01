@@ -298,19 +298,23 @@
                     let candidateName = name;
                     if (!candidateName) {
                         for (const val of nonEmpties) {
-                            if (isNaN(val) && val.length > 1) {
+                            if (isNaN(val) && val.length > 1 && !/^(item\s*#?\s*\d*)$/i.test(val)) {
                                 candidateName = val;
                                 break;
                             }
                         }
                     }
 
-                    if (!candidateName) return; // Only numbers or blank -> skip
+                    // Ignore rows with no candidate name, or placeholder names like "Item #33", "Item #", etc.
+                    if (!candidateName || /^(item\s*#?\s*\d+)$/i.test(candidateName.trim())) return;
+
+                    // Skip empty spacer cells / separator rows that have no real item ID and no description
+                    const cleanName = candidateName.trim();
+                    if (!cleanName || cleanName === '-' || cleanName === '.' || /^(n\/a|none|null|undefined)$/i.test(cleanName)) return;
 
                     // 2. Identify Category / Section Header rows (e.g. "MEAT", "FROZEN", "DRY STORAGE", "DAIRY")
                     // In spreadsheets, category divider rows often only contain the title (e.g. in column A or Description)
                     // and have NO actual product item number, NO pack size, NO unit of measure, and NO count details.
-                    const cleanName = candidateName.trim();
                     const isKnownCategory = /^(meat|meats|frozen|cooler|walk-in|walkin|dry|dry storage|dairy|produce|paper|packaging|beverage|beverages|spices|spice|chemicals|chemical|supplies|bar|prep|bread|bakery|seafood|poultry|canned|canned goods|cleaning)$/i.test(cleanName);
                     
                     const hasItemDetails = (uom && !/^(cs|ea|lb|case|each|unit|units)$/i.test(uom) ? true : Boolean(packSizeRaw)) || (id && id !== candidateName);
