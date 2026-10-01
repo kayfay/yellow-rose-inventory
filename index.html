@@ -93,12 +93,8 @@
             <span class="text-xs font-semibold">Full Count</span>
         </button>
         <button class="tab-btn flex-1 py-3 text-gray-400 border-t-2 border-transparent touch-target flex flex-col items-center" data-tab="spot">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
             <span class="text-xs font-semibold">Spot Check</span>
-        </button>
-        <button class="tab-btn flex-1 py-3 text-gray-400 border-t-2 border-transparent touch-target flex flex-col items-center" data-tab="waste">
-            <svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-            <span class="text-xs font-semibold">Waste Log</span>
         </button>
     </nav>
 
@@ -131,12 +127,23 @@
 
     <script>
         // State
+        const urlParams = new URLSearchParams(window.location.search);
+        const queryUrl = urlParams.get('url') || urlParams.get('worker');
+        const queryPass = urlParams.get('key') || urlParams.get('passcode') || urlParams.get('pass');
+
+        const initialUrl = queryUrl || localStorage.getItem('inv_url') || 'https://inventory-worker.allen-tools.workers.dev';
+        const initialPass = queryPass || localStorage.getItem('inv_passcode') || '';
+
+        if (queryUrl) localStorage.setItem('inv_url', queryUrl);
+        if (queryPass) localStorage.setItem('inv_passcode', queryPass);
+
         let state = {
-            url: localStorage.getItem('inv_url') || '',
-            passcode: localStorage.getItem('inv_passcode') || '',
+            url: initialUrl,
+            passcode: initialPass,
             items: [],
-            currentMode: 'full', // full, spot, waste
-            searchQuery: ''
+            currentMode: 'full', // full, spot
+            searchQuery: '',
+            starredIds: JSON.parse(localStorage.getItem('inv_starred_ids') || '[]')
         };
 
         // Helper to extract properties from Google Sheet row regardless of exact header naming
@@ -267,48 +274,89 @@
                 
                 if(data.error) throw new Error(data.error);
                 
-                state.items = (data.items || [])
-                    .map((raw, idx) => {
-                        const name = getProp(raw, 'Item Name', 'Item', 'Description', 'Product', 'Product Name', 'Name');
-                        const id = getProp(raw, 'ItemID', 'Item ID', 'Item #', 'Product #', 'Product Number', 'ID', 'Code', 'SKU') || `ITEM-${idx + 1}`;
-                        const uom = getProp(raw, 'Unit of Measure', 'Unit', 'UOM', 'Product UOM', 'Measure') || 'Units';
-                        const packSizeRaw = getProp(raw, 'Case Pack Size', 'Pack Size', 'Pack', 'Case Pack', 'Case Qty');
-                        const packSize = parseFloat(packSizeRaw) || 1;
-                        const currentOHRaw = getProp(raw, 'OH', 'On Hand', 'Current Stock', 'Stock', 'Qty', 'Quantity');
-                        const currentOH = currentOHRaw !== '' ? currentOHRaw : '0';
-                        const location = getProp(raw, 'Storage Location', 'Location', 'Category', 'Section', 'Area') || 'General Storage';
-                        const highCostVal = getProp(raw, 'Is High Cost / High Priority', 'High Priority', 'High Cost', 'Priority', 'High');
+                let currentSection = 'General Storage';
+                const parsedItems = [];
 
-                        // Fallback name if row has any non-numeric string
-                        let resolvedName = name;
-                        if (!resolvedName) {
-                            for (const val of Object.values(raw)) {
-                                if (val && typeof val === 'string' && val.trim().length > 1 && isNaN(val)) {
-                                    resolvedName = val.trim();
-                                    break;
-                                }
+                (data.items || []).forEach((raw, idx) => {
+                    // Collect all non-empty cell values
+                    const nonEmpties = Object.values(raw)
+                        .map(v => v !== undefined && v !== null ? String(v).trim() : '')
+                        .filter(v => v.length > 0);
+
+                    // 1. Skip completely blank rows (e.g. blank rows above category titles like rows 9, 17, 33)
+                    if (nonEmpties.length === 0) return;
+
+                    const name = getProp(raw, 'Item Name', 'Item', 'Description', 'Product', 'Product Name', 'Name');
+                    const id = getProp(raw, 'ItemID', 'Item ID', 'Item #', 'Product #', 'Product Number', 'ID', 'Code', 'SKU');
+                    const uom = getProp(raw, 'Unit of Measure', 'Unit', 'UOM', 'Product UOM', 'Measure');
+                    const packSizeRaw = getProp(raw, 'Case Pack Size', 'Pack Size', 'Pack', 'Case Pack', 'Case Qty');
+                    const currentOHRaw = getProp(raw, 'OH', 'On Hand', 'Current Stock', 'Stock', 'Qty', 'Quantity');
+                    const explicitLocation = getProp(raw, 'Storage Location', 'Location', 'Category', 'Section', 'Area');
+                    const highCostVal = getProp(raw, 'Is High Cost / High Priority', 'High Priority', 'High Cost', 'Priority', 'High');
+
+                    // Find primary text identifier
+                    let candidateName = name;
+                    if (!candidateName) {
+                        for (const val of nonEmpties) {
+                            if (isNaN(val) && val.length > 1) {
+                                candidateName = val;
+                                break;
                             }
                         }
+                    }
 
-                        return {
-                            ...raw,
-                            ItemID: id,
-                            name: resolvedName || `Item #${idx + 1}`,
-                            uom: uom,
-                            packSize: packSize,
-                            currentOH: currentOH,
-                            location: location,
-                            isHighPriority: highCostVal.toLowerCase().includes('yes') || highCostVal.toLowerCase().includes('true'),
-                            localCases: 0,
-                            localUnits: 0,
-                            hasChanges: false
-                        };
-                    })
-                    .filter(item => {
-                        // Filter out completely blank rows
-                        const vals = Object.values(item);
-                        return vals.some(v => v !== '' && v !== null && v !== undefined && v !== 0 && v !== '0');
+                    if (!candidateName) return; // Only numbers or blank -> skip
+
+                    // 2. Identify Category / Section Header rows (e.g. "MEAT", "FROZEN", "DRY STORAGE", "DAIRY")
+                    // In spreadsheets, category divider rows often only contain the title (e.g. in column A or Description)
+                    // and have NO actual product item number, NO pack size, NO unit of measure, and NO count details.
+                    const cleanName = candidateName.trim();
+                    const isKnownCategory = /^(meat|meats|frozen|cooler|walk-in|walkin|dry|dry storage|dairy|produce|paper|packaging|beverage|beverages|spices|spice|chemicals|chemical|supplies|bar|prep|bread|bakery|seafood|poultry|canned|canned goods|cleaning)$/i.test(cleanName);
+                    
+                    const hasItemDetails = (uom && !/^(cs|ea|lb|case|each|unit|units)$/i.test(uom) ? true : Boolean(packSizeRaw)) || (id && id !== candidateName);
+                    const isPureTitleRow = isKnownCategory || (!id && !packSizeRaw && (!uom || uom === 'Units') && (currentOHRaw === '' || currentOHRaw === '0'));
+
+                    if (isPureTitleRow || (nonEmpties.length <= 2 && isKnownCategory) || (nonEmpties.length === 1 && !hasItemDetails)) {
+                        // This is a section title row! Use it to categorize following items
+                        currentSection = cleanName.toUpperCase();
+                        return; // Do NOT add as an inventory item card!
+                    }
+
+                    // 3. This is an actual inventory item
+                    const finalLocation = explicitLocation || currentSection;
+                    const finalId = id || candidateName;
+                    const finalUom = uom || 'Units';
+                    const finalPackSize = parseFloat(packSizeRaw) || 1;
+                    const finalOH = currentOHRaw !== '' ? currentOHRaw : '0';
+
+                    const isHigh = highCostVal && (highCostVal.toLowerCase().includes('yes') || highCostVal.toLowerCase().includes('true'));
+                    const isMeat = finalLocation.toUpperCase().includes('MEAT') || /^(beef|brisket|rib|pork|butt|turkey|sausage)/i.test(candidateName);
+                    
+                    // If first run and no saved stars, default star key meat items
+                    if (state.starredIds.length === 0 && (isHigh || isMeat) && !state.starredIds.includes(finalId)) {
+                        state.starredIds.push(finalId);
+                    }
+
+                    const isStarred = state.starredIds.includes(finalId) || isHigh;
+
+                    parsedItems.push({
+                        ...raw,
+                        ItemID: finalId,
+                        name: candidateName,
+                        uom: finalUom,
+                        packSize: finalPackSize,
+                        currentOH: finalOH,
+                        location: finalLocation,
+                        isHighPriority: isHigh,
+                        isStarred: isStarred,
+                        localCases: 0,
+                        localUnits: 0,
+                        hasChanges: false
                     });
+                });
+
+                localStorage.setItem('inv_starred_ids', JSON.stringify(state.starredIds));
+                state.items = parsedItems;
                 
                 DOM.syncBtn.classList.remove('hidden');
                 renderList();
@@ -325,7 +373,7 @@
             let filtered = state.items;
             
             if (state.currentMode === 'spot') {
-                filtered = filtered.filter(i => i.isHighPriority);
+                filtered = filtered.filter(i => i.isStarred || i.isHighPriority);
             }
 
             // Real-time letter matching: instantly adapts list to typed characters
@@ -361,7 +409,16 @@
             }
 
             if(filtered.length === 0) {
-                DOM.inventoryList.innerHTML = `<div class="text-center text-gray-500 mt-10"><p>No items found for this view.</p></div>`;
+                if (state.currentMode === 'spot') {
+                    DOM.inventoryList.innerHTML = `
+                        <div class="text-center text-gray-400 mt-12 px-6">
+                            <div class="w-12 h-12 bg-yellow-500/10 text-yellow-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">★</div>
+                            <p class="text-base font-semibold text-gray-200">No Spot Check items pinned</p>
+                            <p class="text-sm text-gray-400 mt-1.5 max-w-xs mx-auto">Tap the star (★) on any item in Full Count to pin it here for quick daily counts.</p>
+                        </div>`;
+                } else {
+                    DOM.inventoryList.innerHTML = `<div class="text-center text-gray-500 mt-10"><p>No items found for this view.</p></div>`;
+                }
                 return;
             }
 
@@ -400,10 +457,15 @@
                 <div class="flex justify-between items-start mb-3">
                     <div class="flex-1 pr-2">
                         <div class="flex items-center space-x-2 flex-wrap">
+                            <button class="btn-star p-1 text-gray-400 hover:text-yellow-400 touch-target focus:outline-none -ml-1 inline-flex items-center" title="Toggle Spot Check">
+                                <svg class="w-5 h-5 ${item.isStarred ? 'text-yellow-400 fill-current' : 'text-gray-500 fill-none'} stroke-current" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                </svg>
+                            </button>
                             <h4 class="font-bold text-white text-base leading-snug">${displayName}</h4>
                             ${isSearch ? `<span class="bg-gray-700 text-blue-300 text-[10px] font-semibold px-2 py-0.5 rounded tracking-wide uppercase">${item.location}</span>` : ''}
                         </div>
-                        <p class="text-xs text-gray-400 mt-0.5">${displayId} | Pack: ${packSize} ${uom}/Case</p>
+                        <p class="text-xs text-gray-400 mt-0.5 ml-6">${displayId} | Pack: ${packSize} ${uom}/Case</p>
                     </div>
                     <div class="text-right shrink-0">
                         <p class="text-xs text-gray-400">Current OH</p>
@@ -522,6 +584,19 @@
                 () => { item.localUnits++; updateUI(); },
                 () => { item.localUnits += 5; updateUI(); }
             );
+
+            // Star Toggle Handler
+            el.querySelector('.btn-star').addEventListener('click', (e) => {
+                e.stopPropagation();
+                item.isStarred = !item.isStarred;
+                if (item.isStarred) {
+                    if (!state.starredIds.includes(item.ItemID)) state.starredIds.push(item.ItemID);
+                } else {
+                    state.starredIds = state.starredIds.filter(id => id !== item.ItemID);
+                }
+                localStorage.setItem('inv_starred_ids', JSON.stringify(state.starredIds));
+                renderList();
+            });
 
             return el;
         }

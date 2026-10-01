@@ -103,28 +103,33 @@ export default {
         const dataH = await resH.json();
         const headers = dataH.values[0];
         
-        const idCol = headers.indexOf('ItemID');
-        const ohCol = headers.indexOf('OH');
-        const tsCol = headers.indexOf('Timestamp');
+        let idCol = headers.findIndex(h => /^(itemid|item id|item #|id|code|sku)$/i.test((h || '').trim()));
+        let nameCol = headers.findIndex(h => /^(item|item name|product|description|name)$/i.test((h || '').trim()));
+        let ohCol = headers.findIndex(h => /^(oh|on hand|on-hand|current stock|qty|quantity)$/i.test((h || '').trim()));
+        let tsCol = headers.findIndex(h => /^(timestamp|last updated|time|date)$/i.test((h || '').trim()));
 
-        if (idCol === -1 || ohCol === -1) {
-          throw new Error("Missing required columns 'ItemID' or 'OH' in sheet.");
+        if (idCol === -1 && nameCol !== -1) idCol = nameCol;
+        if (idCol === -1) idCol = 0;
+        if (ohCol === -1) {
+          ohCol = headers.findIndex(h => (h || '').toLowerCase().includes('oh') || (h || '').toLowerCase().includes('hand'));
         }
+        if (ohCol === -1) ohCol = 1;
 
         const idColLetter = getColLetter(idCol);
 
-        // Fetch all ItemIDs to find row numbers
+        // Fetch all ItemIDs/names to find row numbers
         const urlId = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(escapedSheet + '!' + idColLetter + ':' + idColLetter)}`;
         const resId = await fetch(urlId, { headers: { Authorization: `Bearer ${token}` } });
         const dataId = await resId.json();
-        const allIds = (dataId.values || []).map(r => r ? r[0] : '');
+        const allIds = (dataId.values || []).map(r => (r && r[0] !== undefined) ? String(r[0]).trim() : '');
 
         const updateData = [];
         const ohColLetter = getColLetter(ohCol);
         const tsColLetter = tsCol !== -1 ? getColLetter(tsCol) : null;
         
         payload.updates.forEach(u => {
-          const rowIndex = allIds.indexOf(String(u.ItemID));
+          const targetId = String(u.ItemID || '').trim().toLowerCase();
+          const rowIndex = allIds.findIndex((val, i) => i > 0 && val.toLowerCase() === targetId);
           if (rowIndex > 0) {
             const rowNumber = rowIndex + 1;
             
