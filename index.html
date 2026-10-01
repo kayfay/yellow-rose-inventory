@@ -601,16 +601,21 @@
                 () => { item.localCases++; updateUI(); }
             );
 
-            // Loose Units: single tap = 1, hold = steady 1-by-1 increment (no sudden jump by 5)
+            // Loose Units: single tap = 1, hold = jumps by 5 with comfortable cadence
             attachHold(
                 el.querySelector('.btn-minus-units'),
                 () => { if (item.localUnits > 0) { item.localUnits--; updateUI(); } },
-                () => { if (item.localUnits > 0) { item.localUnits--; updateUI(); } }
+                () => {
+                    if (item.localUnits > 0) {
+                        item.localUnits = Math.max(0, item.localUnits - 5);
+                        updateUI();
+                    }
+                }
             );
             attachHold(
                 el.querySelector('.btn-plus-units'),
                 () => { item.localUnits++; updateUI(); },
-                () => { item.localUnits++; updateUI(); }
+                () => { item.localUnits += 5; updateUI(); }
             );
 
             // Star Toggle Handler
