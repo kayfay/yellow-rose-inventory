@@ -512,29 +512,54 @@
                 el.classList.add('border-blue-500', 'ring-1', 'ring-blue-500');
             };
 
-            // Hold-to-repeat helper (tap = 1, hold = 5)
+            // Hold-to-repeat helper with scroll-safety
             function attachHold(btn, onSingle, onHold) {
                 let holdTimeout = null;
                 let repeatInterval = null;
                 let held = false;
+                let startX = 0;
+                let startY = 0;
 
                 const clear = () => {
                     if (holdTimeout) { clearTimeout(holdTimeout); holdTimeout = null; }
                     if (repeatInterval) { clearInterval(repeatInterval); repeatInterval = null; }
                 };
 
-                const start = () => {
+                const start = (e) => {
                     held = false;
                     clear();
+
+                    if (e.touches && e.touches.length > 0) {
+                        startX = e.touches[0].clientX;
+                        startY = e.touches[0].clientY;
+                    }
+
+                    // 500ms threshold before hold mode engages (prevents accidental trigger while scrolling)
                     holdTimeout = setTimeout(() => {
                         held = true;
-                        if (navigator.vibrate) navigator.vibrate(15);
+                        if (navigator.vibrate) {
+                            try { navigator.vibrate(10); } catch(err) {}
+                        }
                         onHold();
+                        // Repeat interval set to a steady, controlled 320ms (not too fast)
                         repeatInterval = setInterval(() => {
-                            if (navigator.vibrate) navigator.vibrate(10);
+                            if (navigator.vibrate) {
+                                try { navigator.vibrate(8); } catch(err) {}
+                            }
                             onHold();
-                        }, 180);
-                    }, 350);
+                        }, 320);
+                    }, 500);
+                };
+
+                const move = (e) => {
+                    // If the user's finger moves more than 8px, they are scrolling — immediately cancel!
+                    if (e.touches && e.touches.length > 0) {
+                        const dx = Math.abs(e.touches[0].clientX - startX);
+                        const dy = Math.abs(e.touches[0].clientY - startY);
+                        if (dx > 8 || dy > 8) {
+                            clear();
+                        }
+                    }
                 };
 
                 const stop = () => {
@@ -543,6 +568,7 @@
 
                 btn.addEventListener('mousedown', start);
                 btn.addEventListener('touchstart', start, { passive: true });
+                btn.addEventListener('touchmove', move, { passive: true });
 
                 btn.addEventListener('mouseup', stop);
                 btn.addEventListener('mouseleave', stop);
@@ -556,11 +582,14 @@
                         held = false;
                         return;
                     }
+                    if (navigator.vibrate) {
+                        try { navigator.vibrate(10); } catch(err) {}
+                    }
                     onSingle();
                 });
             }
 
-            // Cases: single tap = 1, hold = repeat 1
+            // Cases: single tap = 1, hold = smooth repeat 1
             attachHold(
                 el.querySelector('.btn-minus-cases'),
                 () => { if (item.localCases > 0) { item.localCases--; updateUI(); } },
@@ -572,21 +601,16 @@
                 () => { item.localCases++; updateUI(); }
             );
 
-            // Loose Units: single tap = 1, hold = increments/decrements by 5!
+            // Loose Units: single tap = 1, hold = steady 1-by-1 increment (no sudden jump by 5)
             attachHold(
                 el.querySelector('.btn-minus-units'),
                 () => { if (item.localUnits > 0) { item.localUnits--; updateUI(); } },
-                () => {
-                    if (item.localUnits > 0) {
-                        item.localUnits = Math.max(0, item.localUnits - 5);
-                        updateUI();
-                    }
-                }
+                () => { if (item.localUnits > 0) { item.localUnits--; updateUI(); } }
             );
             attachHold(
                 el.querySelector('.btn-plus-units'),
                 () => { item.localUnits++; updateUI(); },
-                () => { item.localUnits += 5; updateUI(); }
+                () => { item.localUnits++; updateUI(); }
             );
 
             // Star Toggle Handler
