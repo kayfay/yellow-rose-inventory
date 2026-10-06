@@ -81,8 +81,8 @@
     <!-- MAIN VIEW CONTAINER -->
     <main class="flex-1 overflow-y-auto relative pb-28 p-4 max-w-2xl mx-auto w-full" id="main-content">
 
-        <!-- VIEW 1: WEIGH-IN YIELD CALCULATOR -->
-        <section id="view-yield" class="space-y-4">
+        <!-- VIEW 1: WEIGH-IN YIELD CALCULATOR (OPTIONAL / BACKGROUND) -->
+        <section id="view-yield" class="space-y-4 hidden">
             <div class="bg-gray-800 border border-gray-700 rounded-2xl p-4 shadow-xl">
                 <div class="flex justify-between items-center mb-3">
                     <div>
@@ -396,8 +396,8 @@
             </div>
         </section>
 
-        <!-- VIEW 4: GOOGLE SHEETS INVENTORY / SPOT CHECK (Backwards Compatible) -->
-        <section id="view-sheets" class="space-y-3 hidden">
+        <!-- VIEW 4: GOOGLE SHEETS INVENTORY / SPOT CHECK (PRIMARY VIEW) -->
+        <section id="view-sheets" class="space-y-3">
             <!-- INITIAL LOADING STATE -->
             <div id="loading-state" class="flex flex-col items-center justify-center py-12 hidden">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-amber-500 mb-4"></div>
@@ -458,9 +458,9 @@
 
     <!-- BOTTOM TAB NAVIGATION (MOBILE FIRST & ELBOW TAP FRIENDLY) -->
     <nav class="bg-gray-800 border-t border-gray-700 flex justify-around shrink-0 fixed bottom-0 w-full z-20 pb-safe">
-        <button class="nav-tab-btn flex-1 py-3 text-amber-400 border-t-2 border-amber-400 touch-target flex flex-col items-center elbow-btn" data-view="yield">
-            <span class="text-lg mb-0.5">⚖️</span>
-            <span class="text-xs font-bold">Weigh-In</span>
+        <button class="nav-tab-btn flex-1 py-3 text-amber-400 border-t-2 border-amber-400 touch-target flex flex-col items-center elbow-btn" data-view="sheets">
+            <span class="text-lg mb-0.5">📦</span>
+            <span class="text-xs font-bold">Store Inv</span>
         </button>
         <button class="nav-tab-btn flex-1 py-3 text-gray-400 border-t-2 border-transparent touch-target flex flex-col items-center elbow-btn" data-view="onhand">
             <span class="text-lg mb-0.5">🥩</span>
@@ -469,10 +469,6 @@
         <button class="nav-tab-btn flex-1 py-3 text-gray-400 border-t-2 border-transparent touch-target flex flex-col items-center elbow-btn" data-view="summary">
             <span class="text-lg mb-0.5">📋</span>
             <span class="text-xs font-bold">Summary</span>
-        </button>
-        <button class="nav-tab-btn flex-1 py-3 text-gray-400 border-t-2 border-transparent touch-target flex flex-col items-center elbow-btn" data-view="sheets">
-            <span class="text-lg mb-0.5">📦</span>
-            <span class="text-xs font-bold">Store Inv</span>
         </button>
     </nav>
 
@@ -561,7 +557,7 @@
         };
 
         let appState = {
-            activeView: 'yield',
+            activeView: 'sheets',
             selectedMeat: 'Whole Brisket',
             batches: JSON.parse(localStorage.getItem('yri_batches') || '[]'),
             onHandCounts: JSON.parse(localStorage.getItem('yri_onhand') || JSON.stringify({
