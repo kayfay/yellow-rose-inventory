@@ -1081,18 +1081,6 @@
             return '';
         }
 
-        function bindSheetsEvents() {
-            DOM.configBtn.addEventListener('click', () => DOM.configModal.classList.remove('hidden'));
-            DOM.closeConfig.addEventListener('click', () => DOM.configModal.classList.add('hidden'));
-            DOM.saveConfig.addEventListener('click', saveConfig);
-            DOM.syncBtn.addEventListener('click', syncToSheet);
-
-            const handleSearch = (e) => {
-                appState.searchQuery = e.target.value.toLowerCase().trim();
-                if (appState.searchQuery) {
-                    DOM.clearSearch.classList.remove('hidden');
-                } else {
-                    DOM.clearSearch.classList.add('hidden');
         const KNOWN_SECTIONS = [
             'Meat', 'Frozen', 'Produce', 'Dairy', 'Dry Goods', "To-Go's", 'Chemicals', 'Office Supplies/FOH', 'BIBs'
         ];
