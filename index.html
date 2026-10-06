@@ -429,7 +429,7 @@
                 <p class="text-gray-400">Syncing with Google Sheets...</p>
             </div>
 
-            <!-- ULTRA-COMPACT STICKY TOP CONTAINER (SEARCH + SCAN + PROGRESS + CATEGORY BAR) -->
+            <!-- ULTRA-COMPACT STICKY TOP CONTAINER (SEARCH + SCAN + CATEGORY BAR) -->
             <div id="search-container" class="sticky top-0 z-10 bg-gray-900/95 backdrop-blur pb-1.5 pt-1 -mx-2.5 px-2.5 sm:-mx-4 sm:px-4 border-b border-gray-800 shadow-sm">
                 <div class="flex items-center space-x-1.5 mb-1.5">
                     <div class="relative flex-1">
@@ -445,27 +445,18 @@
                     </div>
 
                     <!-- Scan Button -->
-                    <button type="button" id="btn-scan-shelf" title="Scan Walk-In Shelf" class="touch-target px-3 py-2 bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold rounded-lg flex items-center justify-center space-x-1 shadow elbow-btn shrink-0 text-xs">
+                    <button type="button" id="btn-scan-shelf" title="Scan Walk-In Shelf" class="touch-target px-3.5 py-2 bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold rounded-lg flex items-center justify-center space-x-1 shadow elbow-btn shrink-0 text-xs">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
-                        <span class="hidden xs:inline">Scan</span>
-                    </button>
-
-                    <!-- Compact Needs Count Pill -->
-                    <button id="btn-toggle-uncounted" title="Filter items needing count" class="touch-target px-2.5 py-2 bg-gray-800 hover:bg-gray-750 text-amber-400 border border-gray-700 rounded-lg flex items-center space-x-1 shrink-0 text-xs font-mono font-bold elbow-btn">
-                        <span>Uncounted</span>
-                        <span id="stat-uncounted-count" class="bg-amber-500/20 text-amber-300 px-1 rounded text-[11px]">0</span>
+                        <span class="inline">Scan</span>
                     </button>
                 </div>
 
-                <!-- STICKY CATEGORY JUMP NAVIGATION PILLS & PROGRESS CHIP -->
-                <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 scrollbar-none select-none text-xs font-bold" style="-webkit-overflow-scrolling: touch;">
-                    <span id="stat-counted-progress" class="font-mono text-[11px] text-gray-400 bg-gray-800/90 border border-gray-700/80 px-2 py-1 rounded-full shrink-0">0/0</span>
-                    <div id="category-jump-bar" class="flex space-x-1.5 shrink-0">
-                        <!-- Dynamically rendered pills (Meat, Frozen, Produce, etc.) + 'All' -->
-                    </div>
+                <!-- STICKY CATEGORY JUMP NAVIGATION PILLS -->
+                <div id="category-jump-bar" class="flex space-x-1.5 overflow-x-auto pb-1 scrollbar-none select-none text-xs font-bold" style="-webkit-overflow-scrolling: touch;">
+                    <!-- Dynamically rendered pills (Meat, Frozen, Produce, etc.) + 'All' -->
                 </div>
             </div>
 
@@ -1574,17 +1565,17 @@
             DOM.saveConfig.addEventListener('click', saveConfig);
             DOM.syncBtn.addEventListener('click', syncToSheet);
 
-            DOM.btnToggleUncounted.addEventListener('click', () => {
-                if (appState.currentMode === 'uncounted') {
-                    appState.currentMode = 'full';
-                    DOM.btnToggleUncounted.textContent = `Show Needs Count (${getUncountedCount()})`;
-                } else {
-                    appState.currentMode = 'uncounted';
-                    DOM.btnToggleUncounted.textContent = 'Show All Items';
-                }
-                renderCategoryJumpBar();
-                renderSheetsList();
-            });
+            if (DOM.btnToggleUncounted) {
+                DOM.btnToggleUncounted.addEventListener('click', () => {
+                    if (appState.currentMode === 'uncounted') {
+                        appState.currentMode = 'full';
+                    } else {
+                        appState.currentMode = 'uncounted';
+                    }
+                    renderCategoryJumpBar();
+                    renderSheetsList();
+                });
+            }
 
             const handleSearch = (e) => {
                 appState.searchQuery = e.target.value.toLowerCase().trim();
@@ -1617,10 +1608,11 @@
             const total = appState.items.length;
             const uncounted = getUncountedCount();
             const counted = total - uncounted;
-            DOM.statCountedProgress.textContent = `${counted} / ${total} Counted`;
-            DOM.statUncountedCount.textContent = uncounted;
-            if (appState.currentMode !== 'uncounted') {
-                DOM.btnToggleUncounted.textContent = `Show Needs Count (${uncounted})`;
+            if (DOM.statCountedProgress) {
+                DOM.statCountedProgress.textContent = `${counted} / ${total} Counted`;
+            }
+            if (DOM.statUncountedCount) {
+                DOM.statUncountedCount.textContent = uncounted;
             }
         }
 
