@@ -111,14 +111,17 @@ def test_ui_components(html_content):
         print("  ❌ ERROR: 48px touch targets not defined in CSS/classes.")
         return False
 
-    # Verify sticky Category Jump Bar container exists
-    required_ids = ['category-jump-bar', 'search-container', 'view-sheets', 'btn-sync']
+    # Verify sticky Category Jump Bar container and Camera Scanner components exist
+    required_ids = [
+        'category-jump-bar', 'search-container', 'view-sheets', 'btn-sync',
+        'btn-scan-shelf', 'shelf-camera-input', 'camera-modal', 'camera-detections-list', 'btn-apply-camera-counts'
+    ]
     for req in required_ids:
         if f'id="{req}"' not in html_content:
             print(f"  ❌ ERROR: Required UI container id='{req}' missing in index.html")
             return False
 
-    print("  ✅ Touch targets (>=48px) and Sticky Category Navigation components verified.")
+    print("  ✅ Touch targets (>=48px), Sticky Category Navigation, and Walk-in Camera elements verified.")
     return True
 
 def test_sheet_protection_fixtures():

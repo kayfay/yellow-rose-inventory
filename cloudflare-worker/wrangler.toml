@@ -7,3 +7,4 @@ compatibility_date = "2024-03-20"
 # GOOGLE_PRIVATE_KEY
 # GOOGLE_SHEET_ID
 # EXPECTED_PASSCODE
+# GEMINI_API_KEY (for Walk-in Camera Shelf Scanner)

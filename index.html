@@ -230,9 +230,14 @@
                         </h2>
                         <p class="text-xs text-gray-400">Aluminum sheet pans across 3 warmers with date labels for daily service.</p>
                     </div>
-                    <button type="button" id="btn-reset-counts" class="text-xs text-gray-400 hover:text-white bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg touch-target flex items-center elbow-btn">
-                        Reset Counts
-                    </button>
+                    <div class="flex items-center space-x-2">
+                        <button type="button" id="btn-scan-onhand" title="Snap & Count Warmer Shelf" class="text-xs text-amber-300 hover:text-white bg-amber-950/80 border border-amber-600/80 px-3 py-1.5 rounded-lg touch-target flex items-center space-x-1 elbow-btn">
+                            <span>📷 Scan</span>
+                        </button>
+                        <button type="button" id="btn-reset-counts" class="text-xs text-gray-400 hover:text-white bg-gray-900 border border-gray-700 px-3 py-1.5 rounded-lg touch-target flex items-center elbow-btn">
+                            Reset Counts
+                        </button>
+                    </div>
                 </div>
 
                 <!-- On-Hand Items Grid -->
@@ -428,15 +433,24 @@
 
             <!-- STICKY TOP CONTAINER (SEARCH + CATEGORY JUMP BAR) -->
             <div id="search-container" class="sticky top-0 z-10 bg-gray-900 pb-2 pt-1 -mx-4 px-4 border-b border-gray-800/80 shadow-md">
-                <div class="relative mb-2">
-                    <input type="text" id="search-input" placeholder="🔍 Search items by letters or ID..." 
-                        autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
-                        class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 touch-target text-base shadow-sm">
-                    <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                    </svg>
-                    <button id="clear-search" class="hidden absolute right-3 top-3 text-gray-400 hover:text-white touch-target p-1">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                <div class="flex items-center space-x-2 mb-2">
+                    <div class="relative flex-1">
+                        <input type="text" id="search-input" placeholder="🔍 Search items by letters or ID..." 
+                            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"
+                            class="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pl-10 text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 touch-target text-base shadow-sm">
+                        <svg class="w-5 h-5 text-gray-400 absolute left-3 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <button id="clear-search" class="hidden absolute right-3 top-3 text-gray-400 hover:text-white touch-target p-1">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    <button type="button" id="btn-scan-shelf" title="Scan Walk-In Shelf" class="touch-target px-3.5 py-3 bg-amber-600 hover:bg-amber-500 active:bg-amber-700 text-white font-bold rounded-xl flex items-center justify-center space-x-1 shadow-md elbow-btn shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span class="text-xs hidden sm:inline">Scan</span>
                     </button>
                 </div>
 
@@ -517,6 +531,74 @@
                 <div class="pt-4">
                     <button id="save-config" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold rounded p-4 touch-target elbow-btn">Save & Fetch Inventory</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN CAMERA / FILE INPUT -->
+    <input type="file" id="shelf-camera-input" accept="image/*" capture="environment" class="hidden">
+
+    <!-- CAMERA SCAN & REVIEW MODAL -->
+    <div id="camera-modal" class="fixed inset-0 bg-black bg-opacity-80 z-50 hidden flex flex-col justify-end">
+        <div class="bg-gray-800 rounded-t-2xl p-4 sm:p-6 w-full max-h-[92vh] flex flex-col shadow-2xl border-t border-gray-700">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center pb-3 border-b border-gray-700 shrink-0">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xl">📷</span>
+                    <div>
+                        <h2 class="text-base font-bold text-white leading-tight">Walk-in AI Shelf Scanner</h2>
+                        <p id="camera-scan-status" class="text-xs text-amber-400 font-mono">Ready to inspect</p>
+                    </div>
+                </div>
+                <button id="close-camera-modal" class="text-gray-400 hover:text-white touch-target p-2">
+                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Scrollable Body -->
+            <div class="overflow-y-auto py-3 space-y-3 flex-1">
+                <!-- Thumbnail & Summary -->
+                <div class="flex space-x-3 bg-gray-900 p-3 rounded-xl border border-gray-700 items-start">
+                    <img id="camera-preview-img" src="" alt="Shelf Photo Preview" class="w-24 h-24 object-cover rounded-lg border border-gray-600 shrink-0 bg-gray-800">
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-[11px] uppercase tracking-wider text-gray-400 font-bold">AI Detection Summary</span>
+                            <span id="camera-confidence-badge" class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-400 border border-emerald-800">Ready</span>
+                        </div>
+                        <p id="camera-summary-text" class="text-xs text-gray-200 leading-relaxed font-sans">Point camera at shelf and snap. AI will count cryo bags, rib racks, and boxes.</p>
+                        <div id="camera-unmatched-labels" class="text-[11px] text-amber-300 font-mono mt-1 hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Target Destination Selector -->
+                <div class="bg-gray-900/80 p-2.5 rounded-xl border border-gray-700/80 flex items-center justify-between">
+                    <span class="text-xs font-bold text-gray-300">Target Inventory:</span>
+                    <div class="flex space-x-1">
+                        <button type="button" id="btn-target-store" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-600 text-white border border-amber-500 touch-target elbow-btn">Store Inv</button>
+                        <button type="button" id="btn-target-warmer" class="text-xs font-bold px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 touch-target elbow-btn">Warmer</button>
+                    </div>
+                </div>
+
+                <!-- Detected Items Review List -->
+                <div>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 flex justify-between items-center">
+                        <span>Review Detected Counts</span>
+                        <span class="text-[10px] text-gray-500 font-normal">Adjust before applying</span>
+                    </h3>
+                    <div id="camera-detections-list" class="space-y-2">
+                        <!-- Detected cards rendered dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal Action Buttons (Fixed Bottom) -->
+            <div class="pt-3 border-t border-gray-700 grid grid-cols-2 gap-3 shrink-0">
+                <button type="button" id="btn-retake-photo" class="touch-target bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center space-x-1 elbow-btn text-sm">
+                    <span>🔄 Retake</span>
+                </button>
+                <button type="button" id="btn-apply-camera-counts" class="touch-target bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold py-3 px-4 rounded-xl shadow-lg flex items-center justify-center space-x-1 elbow-btn text-sm">
+                    <span>✅ Apply Counts</span>
+                </button>
             </div>
         </div>
     </div>
@@ -648,7 +730,23 @@
             categoryJumpBar: document.getElementById('category-jump-bar'),
             statCountedProgress: document.getElementById('stat-counted-progress'),
             statUncountedCount: document.getElementById('stat-uncounted-count'),
-            btnToggleUncounted: document.getElementById('btn-toggle-uncounted')
+            btnToggleUncounted: document.getElementById('btn-toggle-uncounted'),
+            // Camera Scanner Elements
+            btnScanShelf: document.getElementById('btn-scan-shelf'),
+            btnScanOnHand: document.getElementById('btn-scan-onhand'),
+            shelfCameraInput: document.getElementById('shelf-camera-input'),
+            cameraModal: document.getElementById('camera-modal'),
+            closeCameraModal: document.getElementById('close-camera-modal'),
+            cameraScanStatus: document.getElementById('camera-scan-status'),
+            cameraPreviewImg: document.getElementById('camera-preview-img'),
+            cameraConfidenceBadge: document.getElementById('camera-confidence-badge'),
+            cameraSummaryText: document.getElementById('camera-summary-text'),
+            cameraUnmatchedLabels: document.getElementById('camera-unmatched-labels'),
+            btnTargetStore: document.getElementById('btn-target-store'),
+            btnTargetWarmer: document.getElementById('btn-target-warmer'),
+            cameraDetectionsList: document.getElementById('camera-detections-list'),
+            btnRetakePhoto: document.getElementById('btn-retake-photo'),
+            btnApplyCameraCounts: document.getElementById('btn-apply-camera-counts')
         };
 
         // Long-Press Stepper Helper (400ms delay, 150ms interval, step 5)
@@ -714,6 +812,7 @@
             bindOnHandEvents();
             bindSummaryEvents();
             bindSheetsEvents();
+            bindCameraEvents();
             
             recalculateYieldLive();
             renderBatchHistory();
@@ -1079,6 +1178,357 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        // ==========================================
+        // WALK-IN & SHELF CAMERA SCANNER (AI VISION)
+        // ==========================================
+        let cameraScanState = {
+            target: 'store', // 'store' or 'warmer'
+            imageBlob: null,
+            imageBase64: null,
+            detections: []
+        };
+
+        function bindCameraEvents() {
+            // Trigger camera from Store Inventory search bar
+            if (DOM.btnScanShelf) {
+                DOM.btnScanShelf.addEventListener('click', () => {
+                    cameraScanState.target = 'store';
+                    updateCameraTargetButtons();
+                    DOM.shelfCameraInput.click();
+                });
+            }
+
+            // Trigger camera from On-Hand Warmer header
+            if (DOM.btnScanOnHand) {
+                DOM.btnScanOnHand.addEventListener('click', () => {
+                    cameraScanState.target = 'warmer';
+                    updateCameraTargetButtons();
+                    DOM.shelfCameraInput.click();
+                });
+            }
+
+            // File / Camera input change
+            if (DOM.shelfCameraInput) {
+                DOM.shelfCameraInput.addEventListener('change', async (e) => {
+                    const file = e.target.files && e.target.files[0];
+                    if (!file) return;
+                    await processCameraPhoto(file);
+                    // Reset input so same file can be snapped again if desired
+                    DOM.shelfCameraInput.value = '';
+                });
+            }
+
+            // Retake photo
+            if (DOM.btnRetakePhoto) {
+                DOM.btnRetakePhoto.addEventListener('click', () => {
+                    DOM.shelfCameraInput.click();
+                });
+            }
+
+            // Close modal
+            if (DOM.closeCameraModal) {
+                DOM.closeCameraModal.addEventListener('click', () => {
+                    DOM.cameraModal.classList.add('hidden');
+                });
+            }
+
+            // Target selector toggles
+            if (DOM.btnTargetStore && DOM.btnTargetWarmer) {
+                DOM.btnTargetStore.addEventListener('click', () => {
+                    cameraScanState.target = 'store';
+                    updateCameraTargetButtons();
+                });
+                DOM.btnTargetWarmer.addEventListener('click', () => {
+                    cameraScanState.target = 'warmer';
+                    updateCameraTargetButtons();
+                });
+            }
+
+            // Apply counts button
+            if (DOM.btnApplyCameraCounts) {
+                DOM.btnApplyCameraCounts.addEventListener('click', applyCameraCountsToInventory);
+            }
+        }
+
+        function updateCameraTargetButtons() {
+            if (cameraScanState.target === 'store') {
+                DOM.btnTargetStore.className = 'text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-600 text-white border border-amber-500 touch-target elbow-btn';
+                DOM.btnTargetWarmer.className = 'text-xs font-bold px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 touch-target elbow-btn';
+            } else {
+                DOM.btnTargetWarmer.className = 'text-xs font-bold px-3 py-1.5 rounded-lg bg-amber-600 text-white border border-amber-500 touch-target elbow-btn';
+                DOM.btnTargetStore.className = 'text-xs font-bold px-3 py-1.5 rounded-lg bg-gray-800 text-gray-300 border border-gray-700 touch-target elbow-btn';
+            }
+        }
+
+        // Downscale image to max 1280px via HTML5 canvas for fast, reliable upload in walk-in coolers
+        async function compressImage(file, maxDimension = 1280, quality = 0.82) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onerror = reject;
+                reader.onload = (readerEvent) => {
+                    const img = new Image();
+                    img.onerror = reject;
+                    img.onload = () => {
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > maxDimension || height > maxDimension) {
+                            if (width > height) {
+                                height = Math.round((height * maxDimension) / width);
+                                width = maxDimension;
+                            } else {
+                                width = Math.round((width * maxDimension) / height);
+                                height = maxDimension;
+                            }
+                        }
+
+                        const canvas = document.createElement('canvas');
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                        resolve(dataUrl);
+                    };
+                    img.src = readerEvent.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function processCameraPhoto(file) {
+            try {
+                // Open modal in analyzing state
+                DOM.cameraModal.classList.remove('hidden');
+                DOM.cameraScanStatus.textContent = 'Compressing image...';
+                DOM.cameraScanStatus.className = 'text-xs text-amber-400 font-mono animate-pulse';
+                DOM.cameraConfidenceBadge.textContent = 'Inspecting';
+                DOM.cameraConfidenceBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-950 text-amber-400 border border-amber-800';
+                DOM.cameraSummaryText.textContent = 'Optimizing photo for walk-in cooler connection...';
+                DOM.cameraUnmatchedLabels.classList.add('hidden');
+                DOM.cameraDetectionsList.innerHTML = `
+                    <div class="flex flex-col items-center justify-center py-8">
+                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-amber-500 mb-3"></div>
+                        <p class="text-xs text-gray-400">Analyzing Cryovac packages, cases, and labels with Gemini Vision...</p>
+                    </div>
+                `;
+
+                const compressedBase64 = await compressImage(file, 1280, 0.82);
+                DOM.cameraPreviewImg.src = compressedBase64;
+                cameraScanState.imageBase64 = compressedBase64;
+
+                DOM.cameraScanStatus.textContent = 'Calling AI Vision...';
+
+                // Known items list from sheet items or defaults
+                const knownItems = appState.items && appState.items.length > 0 
+                    ? appState.items.map(i => i.name).filter(Boolean)
+                    : ['Whole Brisket', 'Pork Butts', 'Pork Rib Racks', 'Sausage Links', 'Dino Ribs', 'Rosebuds', 'Creamer', 'Cream Cheese', 'Turkey', 'Bacon', 'Sausage Casing'];
+
+                // Execute via Cloudflare Worker backend
+                const response = await fetch(appState.url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'scan_shelf',
+                        passcode: appState.passcode,
+                        image: compressedBase64,
+                        knownItems: knownItems
+                    })
+                });
+
+                const data = await response.json();
+                if (data.error) throw new Error(data.error);
+
+                const result = data.result || {};
+                renderCameraDetections(result);
+
+            } catch (err) {
+                DOM.cameraScanStatus.textContent = 'Inspection Failed';
+                DOM.cameraScanStatus.className = 'text-xs text-rose-400 font-mono';
+                DOM.cameraConfidenceBadge.textContent = 'Error';
+                DOM.cameraConfidenceBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded-full bg-rose-950 text-rose-400 border border-rose-800';
+                DOM.cameraSummaryText.textContent = err.message || 'Failed to inspect photo.';
+                DOM.cameraDetectionsList.innerHTML = `
+                    <div class="p-4 bg-rose-950/40 border border-rose-800/80 rounded-xl text-xs text-rose-300">
+                        <p class="font-bold mb-1">Could not complete AI shelf analysis:</p>
+                        <p>${err.message}</p>
+                        <p class="mt-2 text-gray-400">Tip: Ensure your Cloudflare Worker is deployed with <code>GEMINI_API_KEY</code>.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderCameraDetections(result) {
+            DOM.cameraScanStatus.textContent = 'Inspection Complete';
+            DOM.cameraScanStatus.className = 'text-xs text-emerald-400 font-mono';
+            DOM.cameraSummaryText.textContent = result.summary || 'Items detected on shelf.';
+
+            const detections = result.detections || [];
+            cameraScanState.detections = detections.map(d => ({
+                matchedItemName: d.matchedItemName || 'Item',
+                countCases: parseInt(d.countCases) || 0,
+                countLoose: parseInt(d.countLoose) || 0,
+                unit: d.unit || 'units',
+                confidence: d.confidence || 'medium',
+                notes: d.notes || ''
+            }));
+
+            // Overall confidence badge
+            const highConf = cameraScanState.detections.every(d => d.confidence === 'high');
+            DOM.cameraConfidenceBadge.textContent = highConf ? 'High Confidence' : 'Review Counts';
+            DOM.cameraConfidenceBadge.className = `text-[10px] font-mono px-2 py-0.5 rounded-full ${
+                highConf 
+                    ? 'bg-emerald-950 text-emerald-400 border border-emerald-800' 
+                    : 'bg-amber-950 text-amber-400 border border-amber-800'
+            }`;
+
+            // Unmatched labels / tags
+            if (result.unmatchedLabels && result.unmatchedLabels.length > 0) {
+                DOM.cameraUnmatchedLabels.classList.remove('hidden');
+                DOM.cameraUnmatchedLabels.textContent = `Labels/Notes: ${result.unmatchedLabels.join(' • ')}`;
+            } else {
+                DOM.cameraUnmatchedLabels.classList.add('hidden');
+            }
+
+            if (cameraScanState.detections.length === 0) {
+                DOM.cameraDetectionsList.innerHTML = `
+                    <div class="text-center py-6 text-gray-400 text-xs bg-gray-900 rounded-xl border border-gray-700">
+                        <p>No distinct inventory items detected in this frame.</p>
+                        <p class="mt-1 text-gray-500">Tap Retake to try another angle or adjust lighting.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            DOM.cameraDetectionsList.innerHTML = '';
+            cameraScanState.detections.forEach((item, idx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-gray-900 p-3 rounded-xl border border-gray-700 flex flex-col space-y-2';
+
+                card.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="flex items-center space-x-2">
+                                <h4 class="text-sm font-bold text-white">${item.matchedItemName}</h4>
+                                <span class="text-[10px] px-1.5 py-0.5 rounded font-mono ${
+                                    item.confidence === 'high' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400'
+                                }">${item.confidence}</span>
+                            </div>
+                            ${item.notes ? `<p class="text-[11px] text-gray-400 font-sans">${item.notes}</p>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <!-- Cases Stepper -->
+                        <div class="bg-gray-950/80 p-2 rounded-lg border border-gray-800 flex items-center justify-between">
+                            <span class="text-[11px] text-gray-400 font-bold uppercase">Cases</span>
+                            <div class="flex items-center space-x-1">
+                                <button type="button" class="btn-cam-case-minus text-gray-300 bg-gray-800 hover:bg-gray-700 font-extrabold px-2.5 py-1 rounded touch-target elbow-btn text-xs">-1</button>
+                                <span class="cam-case-val text-sm font-black font-mono text-white px-1.5 min-w-[20px] text-center">${item.countCases}</span>
+                                <button type="button" class="btn-cam-case-plus text-amber-400 bg-gray-800 hover:bg-gray-700 font-extrabold px-2.5 py-1 rounded touch-target elbow-btn text-xs">+1</button>
+                            </div>
+                        </div>
+
+                        <!-- Loose Stepper -->
+                        <div class="bg-gray-950/80 p-2 rounded-lg border border-gray-800 flex items-center justify-between">
+                            <span class="text-[11px] text-gray-400 font-bold uppercase">Loose</span>
+                            <div class="flex items-center space-x-1">
+                                <button type="button" class="btn-cam-loose-minus text-gray-300 bg-gray-800 hover:bg-gray-700 font-extrabold px-2.5 py-1 rounded touch-target elbow-btn text-xs">-1</button>
+                                <span class="cam-loose-val text-sm font-black font-mono text-white px-1.5 min-w-[20px] text-center">${item.countLoose}</span>
+                                <button type="button" class="btn-cam-loose-plus text-amber-400 bg-gray-800 hover:bg-gray-700 font-extrabold px-2.5 py-1 rounded touch-target elbow-btn text-xs">+1</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                // Wire up stepper adjustments
+                const caseVal = card.querySelector('.cam-case-val');
+                const looseVal = card.querySelector('.cam-loose-val');
+
+                card.querySelector('.btn-cam-case-minus').addEventListener('click', () => {
+                    item.countCases = Math.max(0, item.countCases - 1);
+                    caseVal.textContent = item.countCases;
+                });
+                card.querySelector('.btn-cam-case-plus').addEventListener('click', () => {
+                    item.countCases++;
+                    caseVal.textContent = item.countCases;
+                });
+                card.querySelector('.btn-cam-loose-minus').addEventListener('click', () => {
+                    item.countLoose = Math.max(0, item.countLoose - 1);
+                    looseVal.textContent = item.countLoose;
+                });
+                card.querySelector('.btn-cam-loose-plus').addEventListener('click', () => {
+                    item.countLoose++;
+                    looseVal.textContent = item.countLoose;
+                });
+
+                DOM.cameraDetectionsList.appendChild(card);
+            });
+        }
+
+        function applyCameraCountsToInventory() {
+            if (cameraScanState.detections.length === 0) {
+                DOM.cameraModal.classList.add('hidden');
+                return;
+            }
+
+            let appliedCount = 0;
+
+            if (cameraScanState.target === 'store') {
+                // Apply to Store Inventory items
+                cameraScanState.detections.forEach(det => {
+                    const cleanName = det.matchedItemName.toLowerCase().trim();
+                    // Match item by name
+                    const match = appState.items.find(i => 
+                        (i.name && i.name.toLowerCase().trim() === cleanName) ||
+                        (i.name && i.name.toLowerCase().includes(cleanName)) ||
+                        (cleanName.includes(i.name && i.name.toLowerCase().trim()))
+                    );
+
+                    if (match) {
+                        match.localCases = det.countCases;
+                        match.localUnits = det.countLoose;
+                        match.isUncounted = false;
+                        match.hasChanges = true;
+                        appliedCount++;
+                    }
+                });
+
+                // Persist & re-render store view
+                localStorage.setItem('inv_cached_items', JSON.stringify(appState.items));
+                renderSheetsList();
+                updateStatsKpi();
+                switchView('sheets');
+
+            } else {
+                // Apply to On-Hand Warmer items
+                cameraScanState.detections.forEach(det => {
+                    const cleanName = det.matchedItemName.toLowerCase().trim();
+                    const matchKey = Object.keys(appState.onHandCounts).find(k => 
+                        k.toLowerCase().trim() === cleanName ||
+                        k.toLowerCase().includes(cleanName) ||
+                        cleanName.includes(k.toLowerCase())
+                    );
+
+                    if (matchKey) {
+                        // For warmer items, sum cases/sheets + loose parcels
+                        const totalUnits = (det.countCases * 20) + det.countLoose;
+                        appState.onHandCounts[matchKey] = totalUnits > 0 ? totalUnits : det.countLoose;
+                        appliedCount++;
+                    }
+                });
+
+                saveAndRenderOnHand();
+                switchView('onhand');
+            }
+
+            if (navigator.vibrate) {
+                try { navigator.vibrate(50); } catch(e) {}
+            }
+
+            DOM.cameraModal.classList.add('hidden');
+            alert(`Applied camera counts to ${appliedCount} inventory item(s)!`);
         }
 
         // ==========================================
