@@ -1,0 +1,17 @@
+[
+  {
+    "id": "BATCH-2026-10-05-01",
+    "timestamp": "2026-10-05T14:00:00Z",
+    "item": "Whole Brisket",
+    "caseWeight": 100.0,
+    "postTrimWeight": 80.0,
+    "cookedWeight": 42.0,
+    "rawPricePerLb": 5.0,
+    "trimLossPct": 20.0,
+    "cookShrinkagePct": 47.5,
+    "totalNetYieldPct": 42.0,
+    "effectiveCookedCost": 11.9,
+    "estPortions": 109,
+    "notes": "Prime packer brisket, post-oak 14hr cook"
+  }
+]

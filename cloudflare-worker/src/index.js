@@ -85,8 +85,8 @@ export default {
         }
 
         const headers = rows[0];
-        const items = rows.slice(1).map(row => {
-          let obj = {};
+        const items = rows.slice(1).map((row, idx) => {
+          let obj = { _row: idx + 2 };
           headers.forEach((h, i) => obj[h] = row[i] !== undefined ? row[i] : '');
           return obj;
         });
@@ -106,18 +106,21 @@ export default {
         let idCol = headers.findIndex(h => /^(itemid|item id|item #|id|code|sku)$/i.test((h || '').trim()));
         let nameCol = headers.findIndex(h => /^(item|item name|product|description|name)$/i.test((h || '').trim()));
         let ohCol = headers.findIndex(h => /^(oh|on hand|on-hand|current stock|qty|quantity)$/i.test((h || '').trim()));
-        let tsCol = headers.findIndex(h => /^(timestamp|last updated|time|date)$/i.test((h || '').trim()));
+        let tsCol = headers.findIndex(h => /^(timestamp|last updated)$/i.test((h || '').trim()));
 
         if (idCol === -1 && nameCol !== -1) idCol = nameCol;
         if (idCol === -1) idCol = 0;
+        
+        // Strict Sheet Protection: Reject if OH column cannot be resolved by exact header match
         if (ohCol === -1) {
-          ohCol = headers.findIndex(h => (h || '').toLowerCase().includes('oh') || (h || '').toLowerCase().includes('hand'));
+          return new Response(JSON.stringify({ error: "Sheet Protection: OH column header not found." }), {
+            status: 422, headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' }
+          });
         }
-        if (ohCol === -1) ohCol = 1;
 
         const idColLetter = getColLetter(idCol);
 
-        // Fetch all ItemIDs/names to find row numbers
+        // Fetch all ItemIDs/names to verify row alignment
         const urlId = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(escapedSheet + '!' + idColLetter + ':' + idColLetter)}`;
         const resId = await fetch(urlId, { headers: { Authorization: `Bearer ${token}` } });
         const dataId = await resId.json();
@@ -129,17 +132,34 @@ export default {
         
         payload.updates.forEach(u => {
           const targetId = String(u.ItemID || '').trim().toLowerCase();
-          const rowIndex = allIds.findIndex((val, i) => i > 0 && val.toLowerCase() === targetId);
+          const targetRow = parseInt(u._row, 10);
+          let rowIndex = -1;
+
+          // If valid targetRow provided, verify that the item name at that row matches to prevent duplicate-name collisions
+          if (targetRow && targetRow >= 2 && targetRow <= allIds.length) {
+            const actualName = (allIds[targetRow - 1] || '').toLowerCase();
+            if (actualName === targetId || !targetId) {
+              rowIndex = targetRow - 1;
+            }
+          }
+
+          // Fallback to name search only if row validation didn't match
+          if (rowIndex === -1 && targetId) {
+            rowIndex = allIds.findIndex((val, i) => i > 0 && val.toLowerCase() === targetId);
+          }
+
           if (rowIndex > 0) {
             const rowNumber = rowIndex + 1;
+            const numericOH = Number(u.OH_Quantity);
+            const safeOH = (!isNaN(numericOH) && numericOH >= 0) ? numericOH : 0;
             
-            // Push OH Update
+            // Push OH Update (Strict single-cell update)
             updateData.push({
               range: `${escapedSheet}!${ohColLetter}${rowNumber}`,
-              values: [[u.OH_Quantity]]
+              values: [[safeOH]]
             });
             
-            // Push Timestamp Update if exists
+            // Push Timestamp Update if column exists in sheet
             if (tsColLetter) {
               updateData.push({
                 range: `${escapedSheet}!${tsColLetter}${rowNumber}`,

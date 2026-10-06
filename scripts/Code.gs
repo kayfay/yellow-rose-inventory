@@ -37,7 +37,7 @@ function doPost(e) {
       
       for (let i = 1; i < data.length; i++) {
         const row = data[i];
-        const item = {};
+        const item = { _row: i + 1 };
         for (let j = 0; j < headers.length; j++) {
           item[headers[j]] = row[j];
         }
@@ -51,35 +51,49 @@ function doPost(e) {
     // 3. Handle 'update' action (CRITICAL: Only update OH and Timestamp)
     if (payload.action === 'update' && payload.updates) {
       const data = sheet.getDataRange().getValues();
-      const headers = data[0];
+      const headers = data[0].map(h => String(h || '').trim().toLowerCase());
       
-      const idIndex = headers.indexOf('ItemID');
-      const ohIndex = headers.indexOf('OH');
-      const timestampIndex = headers.indexOf('Timestamp'); // Ensure you have a Timestamp column!
+      const idIndex = headers.findIndex(h => /^(itemid|item id|item #|id|code|sku|product|item name|item)$/i.test(h));
+      const ohIndex = headers.findIndex(h => /^(oh|on hand|on-hand|current stock|qty|quantity)$/i.test(h));
+      const timestampIndex = headers.findIndex(h => /^(timestamp|last updated)$/i.test(h));
       
-      if (idIndex === -1 || ohIndex === -1) {
-        throw new Error("Missing required columns: ItemID or OH");
+      if (ohIndex === -1) {
+        throw new Error("Sheet Protection: OH column header not found.");
       }
       
       let updatedCount = 0;
       
-      // Map updates by ItemID for quick lookup
-      const updateMap = {};
-      payload.updates.forEach(u => updateMap[u.ItemID] = u);
-      
-      // Update sheet rows
-      for (let i = 1; i < data.length; i++) {
-        const rowId = String(data[i][idIndex]);
-        if (updateMap[rowId]) {
-          // Write OH
-          sheet.getRange(i + 1, ohIndex + 1).setValue(updateMap[rowId].OH_Quantity);
-          // Write Timestamp if column exists
+      payload.updates.forEach(u => {
+        const targetId = String(u.ItemID || '').trim().toLowerCase();
+        const targetRow = parseInt(u._row, 10);
+        let rowIndex = -1;
+
+        if (targetRow && targetRow >= 2 && targetRow <= data.length) {
+          const rowName = String(data[targetRow - 1][idIndex] || '').trim().toLowerCase();
+          if (rowName === targetId || !targetId) {
+            rowIndex = targetRow - 1;
+          }
+        }
+
+        if (rowIndex === -1 && targetId) {
+          for (let i = 1; i < data.length; i++) {
+            if (String(data[i][idIndex] || '').trim().toLowerCase() === targetId) {
+              rowIndex = i;
+              break;
+            }
+          }
+        }
+
+        if (rowIndex >= 1) {
+          const numericOH = Number(u.OH_Quantity);
+          const safeOH = (!isNaN(numericOH) && numericOH >= 0) ? numericOH : 0;
+          sheet.getRange(rowIndex + 1, ohIndex + 1).setValue(safeOH);
           if (timestampIndex !== -1) {
-            sheet.getRange(i + 1, timestampIndex + 1).setValue(updateMap[rowId].Timestamp);
+            sheet.getRange(rowIndex + 1, timestampIndex + 1).setValue(u.Timestamp);
           }
           updatedCount++;
         }
-      }
+      });
       
       return ContentService.createTextOutput(JSON.stringify({ success: true, updated: updatedCount }))
         .setMimeType(ContentService.MimeType.JSON);
